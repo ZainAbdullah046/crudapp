@@ -15,9 +15,9 @@ class _TodoState extends State<todo> {
 
   Future<List<ModelCrud>> getPostapi() async {
     var url = Uri.parse(
-        "https://crudcrud.com/api/a1c5014e53294f12b926bbfddc21c83d/unicorns");
+        "https://crudcrud.com/api/53ffa738fd394f199562da85a86dfeb2/unicorns");
     var response = await http.get(url);
-    var responseBody = converter.jsonDecode(response.body); // Fixed typo here
+    var responseBody = converter.jsonDecode(response.body);
     var eachmap;
     for (eachmap in responseBody) {
       task.add(ModelCrud.fromJson(eachmap));
@@ -37,7 +37,7 @@ class _TodoState extends State<todo> {
               itemCount: snapshot.data!.length, // Fixed typo here
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(snapshot.data![index].taskName.toString() ??
+                  title: Text(snapshot.data![index].name.toString() ??
                       "no taskname"), // Fixed typo here
                 );
               },
