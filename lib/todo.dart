@@ -3,39 +3,90 @@ import 'package:crudapp/ModelCrud.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class todo extends StatefulWidget {
-  const todo({Key? key}) : super(key: key);
+class Todo extends StatefulWidget {
+  const Todo({Key? key}) : super(key: key);
 
   @override
-  State<todo> createState() => _TodoState();
+  State<Todo> createState() => _TodoState();
 }
 
-class _TodoState extends State<todo> {
+class _TodoState extends State<Todo> {
   DateTime now = DateTime.now();
   List<ModelCrud> task = [];
 
-  Future<List<ModelCrud>> getPostapi() async {
+  sendDataToApi(String name, String age) async {
+    final body = {
+      "name": name,
+      "age": age,
+    };
+    var url =
+        "https://crudcrud.com/api/53ffa738fd394f199562da85a86dfeb2/unicorns";
+    final uri = Uri.parse(url);
+    var response = await http.post(
+      uri,
+      body: converter.jsonEncode(body),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 201) {
+      print('Creation Success');
+    } else {
+      print("Creation Failed");
+    }
+  }
+
+  Future<List<ModelCrud>> getApi() async {
     var url = Uri.parse(
         "https://crudcrud.com/api/53ffa738fd394f199562da85a86dfeb2/unicorns");
     var response = await http.get(url);
-    var responseBody = converter.jsonDecode(response.body);
-    var eachmap;
-    for (eachmap in responseBody) {
-      task.add(ModelCrud.fromJson(eachmap));
+    if (response.statusCode == 200) {
+      var responseBody = converter.jsonDecode(response.body);
+      var eachMap;
+      for (eachMap in responseBody) {
+        task.add(ModelCrud.fromJson(eachMap));
+      }
+    } else {
+      print("Failed to load data");
     }
     return task;
+  }
+
+  updatebyid(String id, String name, String age) async {
+    final body = {
+      "name": name,
+      "age": age,
+    };
+    final url =
+        'https://crudcrud.com/api/53ffa738fd394f199562da85a86dfeb2/unicorns/$id';
+    final uri = Uri.parse(url);
+    var response = await http.put(
+      uri,
+      body: converter.jsonEncode(body),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 201) {
+      print('Creation Success');
+    } else {
+      print("Creation Failed");
+    }
+  }
+
+  deleteById(String id) async {
+    final url =
+        'https://crudcrud.com/api/53ffa738fd394f199562da85a86dfeb2/unicorns/$id';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    await http.delete(uri);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: getPostapi(),
+        future: getApi(),
         builder: (context, AsyncSnapshot<List<ModelCrud>> snapshot) {
           if (snapshot.hasData) {
-            // Fixed typo here
             return ListView.builder(
-              itemCount: snapshot.data!.length, // Fixed typo here
+              itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   tileColor: Colors.blueGrey,
@@ -43,12 +94,27 @@ class _TodoState extends State<todo> {
                     backgroundColor: Colors.black,
                   ),
                   title:
-                      Text(snapshot.data![index].name.toString() ?? "no name"),
+                      Text(snapshot.data![index].name.toString() ?? "No name"),
                   subtitle: Row(
                     children: [
                       Text("${snapshot.data![index].age.toString()} years" ??
-                          "no age"),
+                          "No age"),
                       Text(' ${now.day}-${now.month}-${now.year}'),
+                    ],
+                  ),
+                  trailing: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          await deleteById(snapshot.data?[index].sId ?? 0);
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
+                      IconButton(
+                          onPressed: () async {
+                            await updatebyid(snapshot.data?[index].sId ?? 0);
+                          },
+                          icon: const Icon(Icons.edit))
                     ],
                   ),
                 );
@@ -57,8 +123,8 @@ class _TodoState extends State<todo> {
           } else {
             return const Center(
               child: Text(
-                "NOTHING TO SHOW ANY DATA",
-                style: TextStyle(color: Colors.white),
+                "No data available",
+                style: TextStyle(color: Colors.black),
               ),
             );
           }
@@ -93,11 +159,11 @@ class _TodoState extends State<todo> {
                     child: const Text("Cancel"),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      String name = nameController.text;
+                      String age = ageController.text;
+                      sendDataToApi(name, age);
                       setState(() {
-                        String name = nameController.text;
-                        String age = ageController.text;
-                        SendDatatoapi(name, age);
                         nameController.clear();
                       });
                       Navigator.of(context).pop();
@@ -109,13 +175,11 @@ class _TodoState extends State<todo> {
             },
           );
         },
-        child: const Text(
-          "Add",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: const Text("Add",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            )),
       ),
     );
   }
