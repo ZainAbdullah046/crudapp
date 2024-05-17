@@ -105,15 +105,67 @@ class _TodoState extends State<Todo> {
                     children: [
                       IconButton(
                         onPressed: () async {
-                          await deleteById(snapshot.data?[index].sId ?? 0);
+                          await deleteById(snapshot.data?[index].sId ?? "0");
                         },
                         icon: const Icon(Icons.delete),
                       ),
                       IconButton(
-                          onPressed: () async {
-                            await updatebyid(snapshot.data?[index].sId ?? 0);
-                          },
-                          icon: const Icon(Icons.edit))
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              TextEditingController nameController =
+                                  TextEditingController();
+                              TextEditingController ageController =
+                                  TextEditingController();
+                              nameController.text =
+                                  snapshot.data![index].name ?? "0";
+                              ageController.text =
+                                  snapshot.data![index].name ?? "0";
+                              return AlertDialog(
+                                title: const Text("Update your details"),
+                                content: Column(
+                                  children: [
+                                    TextField(
+                                      controller: nameController,
+                                      decoration: const InputDecoration(
+                                          hintText: "Name"),
+                                    ),
+                                    TextField(
+                                      controller: ageController,
+                                      decoration: const InputDecoration(
+                                          hintText: "Age"),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        String name = nameController.text;
+                                        String age = ageController.text;
+                                        updatebyid(
+                                            snapshot.data?[index].sId ?? "0",
+                                            name,
+                                            age);
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Save"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.edit),
+                      ),
                     ],
                   ),
                 );

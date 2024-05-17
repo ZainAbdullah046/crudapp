@@ -1,7 +1,7 @@
 class ModelCrud {
   String? sId;
   String? name;
-  int? age;
+  String? age;
 
   ModelCrud({this.sId, this.name, this.age});
 
