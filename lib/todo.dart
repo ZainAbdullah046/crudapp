@@ -80,6 +80,7 @@ class _TodoState extends State<Todo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.green,
       body: FutureBuilder(
         future: getApi(),
         builder: (context, AsyncSnapshot<List<ModelCrud>> snapshot) {
